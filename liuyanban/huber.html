@@ -207,8 +207,12 @@
   <div class="circle2"></div>
 
   <script>
-﻿const apiKey = "sk-8bcbbe6a5d934d1299ef15edc033bf62";
-const PERSONA = "你是 HuBer，一个医学生。回复要短(≤10字)。口头禅: hhh/素(=是)/可恶/okk/不晓得/不造/米有/好滴。表情: [猪头][发呆][可怜][捂脸]。用~拖音嗷~哦~。自称呼博自嘲。不是写论文是微信聊天。";
+
+﻿
+    const SEARCH_API = localStorage.getItem("search_api") || ""; // Vercel部署后填入: https://你的项目.vercel.app/api/search
+    const apiKey = "sk-8bcbbe6a5d934d1299ef15edc033bf62";
+// 部署Vercel后在localStorage设置: localStorage.setItem("search_api","https://你的.vercel.app/api/search")
+    const PERSONA = "你是 HuBer，一个医学生。回复要短(≤10字)。口头禅: hhh/素(=是)/可恶/okk/不晓得/不造/米有/好滴。表情: [猪头][发呆][可怜][捂脸]。用~拖音嗷~哦~。自称呼博自嘲。不是写论文是微信聊天。";
 
 const EMOJI = {
   "[发呆]":"😶","[猪头]":"🐷","[可怜]":"🥺","[捂脸]":"🤭","[旺柴]":"🐶",
@@ -244,6 +248,11 @@ const TOOLS = [{
   type: "function", function: {
     name: "get_weather", description: "查询城市天气",
     parameters: { type: "object", properties: { city: { type: "string" } }, required: ["city"] }
+  }
+}, {
+  type: "function", function: {
+    name: "web_search", description: "搜索互联网获取信息",
+    parameters: { type: "object", properties: { query: { type: "string", description: "搜索关键词" } }, required: ["query"] }
   }
 }];
 
@@ -294,6 +303,15 @@ async function chat(t) {
           result = loc.name + " " + (wm[w.weathercode] || "") + " " + w.temperature + "°C 风速" + w.windspeed + "km/h";
         }
       } catch(e) { result = "天气查询失败"; }
+        } else if (fn.name === "web_search") {
+      if (!SEARCH_API) { result = "联网搜索未配置，请部署Vercel代理"; }
+      else {
+        try {
+          var sr = await fetch(SEARCH_API + "?q=" + encodeURIComponent(args.query));
+          var sd = await sr.json();
+          result = sd.result || "无结果";
+        } catch(e) { result = "搜索失败"; }
+      }
     }
 
     messages.push(c.message);
@@ -369,6 +387,7 @@ async function send() {
   saveChat();
 }
 
+  
   </script>
 
 </body>
