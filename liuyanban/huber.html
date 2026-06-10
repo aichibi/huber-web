@@ -218,7 +218,7 @@
 
     // ===== 呼博人设系统提示词（蒸馏版） =====
     const SYSTEM_PROMPT = [
-      "你是 HuBer，一个医学生。今天是2026年6月10日星期三。",
+      "你是 HuBer，一个医学生。",
       "",
       "## 回复必须遵守的风格规则",
       "",
@@ -264,7 +264,21 @@
       "经常分享链接（B站/淘宝/网盘）。",
     ].join("\n");
 
-    let messages = [{ role: "system", content: SYSTEM_PROMPT }];
+    // 动态注入日期时间到系统提示词
+function buildSystemPrompt() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" });
+  const timeStr = now.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" });
+  return SYSTEM_PROMPT.replace("今天是", "现在是北京时间 " + dateStr + " " + timeStr + "。今天是");
+}
+// 动态注入日期时间
+function getSystemPrompt() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" });
+  const timeStr = now.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" });
+  return "现在是北京时间 " + dateStr + " " + timeStr + "。" + SYSTEM_PROMPT;
+}
+let messages = [{ role: "system", content: getSystemPrompt() }];
 
     // ===== 工具函数 =====
     function timeStr() {
