@@ -1,0 +1,158 @@
+<!--
+  文件名：liuyanban.html
+  描述：玻璃拟态风格留言板页面（Supabase 版，支持多设备同时留言）
+  依赖：Google Fonts (Poppins)、liuyanban.css
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glass Website</title>
+    <!-- 引入 Google Fonts：Poppins 字体 -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- 引入自定义样式表 -->
+    <link rel="stylesheet" href="./liuyanban.css" />
+  </head>
+  <body>
+    <main>
+      <section class="glass">
+        <!-- ===== 左侧面板 ===== -->
+        <div class="dashboard">
+          <div class="user">
+            <div class="pic">
+              <div class="pic pic1"></div>
+            </div>
+            <h3>爱吃币</h3>
+            <p>总有些惊奇的际遇</p>
+          </div>
+          <div class="links">
+            <div class="link"><h2>首页</h2></div>
+            <div class="link"><h2>留言</h2></div>
+            <div class="link" onclick="location.href='huber.html'"><h2>未知</h2></div>
+            <div class="link"><h2>其他</h2></div>
+          </div>
+          <div class="pro">
+            <h2>welcome to my Web</h2>
+            <img src="" alt="" />
+          </div>
+        </div>
+
+        <!-- ===== 右侧留言板 ===== -->
+        <div class="liuyan">
+          <div class="status">
+            <h1>留言板</h1>
+            <!-- 昵称输入框 -->
+            <input type="text" id="nameInput" placeholder="昵称（可选）" />
+            <!-- 留言内容输入框 -->
+            <textarea id="messageInput" placeholder="写下你的留言..."></textarea>
+            <!-- 发表按钮，点击触发 submitMessage() -->
+            <button class="button" onclick="submitMessage()">发表</button>
+          </div>
+
+          <!-- 留言卡片列表 -->
+          <div class="cards" id="messageList">
+            <p style="text-align: center; color: #658ec6; opacity: 0.7">
+              加载中...
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 背景装饰圆 -->
+    <div class="circle1"></div>
+    <div class="circle2"></div>
+
+    <!-- ===== Supabase SDK ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- ===== Supabase 留言板逻辑 ===== -->
+    <script>
+      // 初始化 Supabase 客户端
+      const SUPABASE_URL = "https://ixowncnmsgdxrzymqmjd.supabase.co";
+      const SUPABASE_KEY =
+        "sb_publishable_L6s2L9sV93gzl8htumPsNA_OY2dxTbH";
+      const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // ========================
+      // 提交留言
+      // ========================
+      async function submitMessage() {
+        const name =
+          document.getElementById("nameInput").value.trim() || "匿名";
+        const text = document.getElementById("messageInput").value.trim();
+
+        // 校验：留言内容不能为空
+        if (!text) {
+          alert("留言内容不能为空！");
+          return;
+        }
+
+        // 写入 Supabase 数据库
+        const { error } = await db.from("messages").insert({ name, text });
+
+        if (error) {
+          alert("发表失败：" + error.message);
+          return;
+        }
+
+        // 清空输入框 + 刷新列表
+        document.getElementById("nameInput").value = "";
+        document.getElementById("messageInput").value = "";
+        await loadMessages();
+      }
+
+      // ========================
+      // 渲染留言列表
+      // ========================
+      async function loadMessages() {
+        const listEl = document.getElementById("messageList");
+
+        // 从 Supabase 查询最新留言（按时间倒序）
+        const { data: messages, error } = await db
+          .from("messages")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          listEl.innerHTML =
+            '<p style="text-align:center; color:#658ec6; opacity:0.7;">加载失败：' +
+            error.message +
+            "</p>";
+          return;
+        }
+
+        if (!messages || messages.length === 0) {
+          listEl.innerHTML =
+            '<p style="text-align:center; color:#658ec6; opacity:0.7;">还没有留言，快来抢沙发吧！</p>';
+          return;
+        }
+
+        // 动态生成留言卡片
+        let html = "";
+        messages.forEach((msg) => {
+          const time = msg.created_at
+            ? new Date(msg.created_at).toLocaleString("zh-CN")
+            : "";
+          html += `
+            <div class="card">
+              <div class="card-info">
+                <h2>${msg.name}</h2>
+                <p>${msg.text}</p>
+                <small style="color:#999">${time}</small>
+              </div>
+            </div>
+          `;
+        });
+        listEl.innerHTML = html;
+      }
+
+      // 页面加载时自动显示已有留言
+      loadMessages();
+    </script>
+  </body>
+</html>

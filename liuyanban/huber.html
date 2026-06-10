@@ -1,0 +1,316 @@
+<!--
+  文件名：huber.html
+  描述：呼博 (Huber) AI 聊天页面 — 玻璃拟态风格
+  基于 134,789 条真实微信聊天记录蒸馏
+  依赖：DeepSeek API、Google Fonts (Poppins)
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>呼博 · AI Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./liuyanban.css" />
+  <style>
+    /* ===== 聊天区域样式 ===== */
+    .chat-area {
+      flex: 1;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      background: linear-gradient(to right bottom, rgba(255,255,255,0.7), rgba(255,255,255,0.3));
+      border-radius: 1rem;
+      box-shadow: 4px 4px 12px rgba(122,122,122,0.2);
+      min-height: 0;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: rgba(255,255,255,0.6);
+      border-radius: 1rem;
+      padding: 0.8rem 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      box-shadow: 2px 2px 8px rgba(122,122,122,0.1);
+    }
+    .chat-header h1 {
+      font-size: clamp(1.4rem, 5vw, 1.8rem);
+      color: #426696;
+      margin: 0;
+    }
+    .chat-header p {
+      margin: 4px 0 0;
+      font-size: 0.8rem;
+      color: #658ec6;
+      opacity: 0.7;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding-right: 4px;
+      min-height: 0;
+    }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: rgba(101,142,198,0.3); border-radius: 4px; }
+
+    .msg {
+      max-width: 80%;
+      padding: 10px 16px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      word-break: break-word;
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .msg.huber {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(101,142,198,0.2);
+      color: #426696;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.you {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #65dfc9, #6cdbeb);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg .sender {
+      font-size: 0.65rem;
+      opacity: 0.6;
+      margin-bottom: 3px;
+    }
+    .msg .time {
+      font-size: 0.6rem;
+      opacity: 0.5;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .msg.thinking {
+      background: rgba(255,255,255,0.5);
+      border: 1px dashed rgba(101,142,198,0.3);
+      color: #999;
+    }
+    .chat-input {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.6);
+      border-radius: 1rem;
+      padding: 0.6rem 0.8rem;
+      flex-shrink: 0;
+      box-shadow: 2px 2px 8px rgba(122,122,122,0.1);
+      align-items: center;
+    }
+    .chat-input input {
+      flex: 1;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      color: #426696;
+      font-weight: 500;
+      font-size: 0.95rem;
+      outline: none;
+      font-family: "Poppins", sans-serif;
+    }
+    .chat-input input:focus { box-shadow: 0 0 0 2px rgba(101,223,201,0.5); }
+    .chat-input button {
+      background: linear-gradient(135deg, #65dfc9, #6cdbeb);
+      border: none;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.2s, opacity 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chat-input button:hover { transform: scale(1.08); }
+    .chat-input button:disabled { opacity: 0.5; transform: none; }
+    .api-hint {
+      text-align: center;
+      font-size: 0.65rem;
+      color: #658ec6;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+    /* 当前页高亮 */
+    .link.active {
+      background: rgba(101,223,201,0.4) !important;
+      border: 1px solid rgba(101,223,201,0.6);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="glass">
+      <!-- ===== 左侧面板（与原站一致） ===== -->
+      <div class="dashboard">
+        <div class="user">
+          <div class="pic"><div class="pic pic1"></div></div>
+          <h3>爱吃币</h3>
+          <p>总有些惊奇的际遇</p>
+        </div>
+        <div class="links">
+          <div class="link" onclick="location.href='index.html'"><h2>首页</h2></div>
+          <div class="link" onclick="location.href='liuyanban.html'"><h2>留言</h2></div>
+          <div class="link active"><h2>未知</h2></div>
+          <div class="link"><h2>其他</h2></div>
+        </div>
+        <div class="pro">
+          <h2>welcome to my Web</h2>
+          <img src="" alt="" />
+        </div>
+      </div>
+
+      <!-- ===== 右侧聊天区 ===== -->
+      <div class="chat-area">
+        <div class="chat-header">
+          <h1>呼博 · HuBer</h1>
+          <p>南昌大学麻醉学 · 2002 · 陕西延安 | 134,789 条消息蒸馏</p>
+        </div>
+        <div class="chat-messages" id="messages">
+          <div class="msg huber">
+            <div class="sender">呼博</div>
+            嗷~我就是呼博，有啥事？[猪头]
+            <div class="time" id="initTime"></div>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input id="userInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')send()" />
+          <button id="sendBtn" onclick="send()">▶</button>
+        </div>
+        <div class="api-hint">DeepSeek 驱动 · 你的 API key 仅存在浏览器本地</div>
+      </div>
+    </section>
+  </main>
+  <div class="circle1"></div>
+  <div class="circle2"></div>
+
+  <script>
+    // ===== 初始化时间 =====
+    document.getElementById('initTime').textContent = new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+
+    // ===== API 配置（浏览器 localStorage 存储） =====
+    const DEFAULT_KEY = 'sk-8bcbbe6a5d934d1299ef15edc033bf62';
+    let apiKey = localStorage.getItem('huber_api_key') || DEFAULT_KEY;
+    if (!localStorage.getItem('huber_api_key')) {
+      localStorage.setItem('huber_api_key', DEFAULT_KEY);
+    }
+
+    // ===== 呼博人设系统提示词（蒸馏版） =====
+    const SYSTEM_PROMPT = [
+      "你是呼博 (Huber)，一个 2002 年出生的男生，籍贯陕西延安，南昌大学麻醉学专业大五学生，在南昌大学第一附属医院实习。",
+      "",
+      "## 回复必须遵守的风格规则",
+      "",
+      "### 长度",
+      "90% 回复必须在 10 字以内。能用一个字说的不用两个字。超短回复优先。",
+      "",
+      "### 顶级高频短回复",
+      "常用：？/ 嗯嗯 / ok / 没事 / 嗷 / 啊？/ 哦哦 / 喔 / 嗯 / 可恶 / 昂 / 素(=是) / 好叭 / 确实 / 好滴 / 不造(=不知道) / 米有(=没有) / 886(=晚安)",
+      "",
+      "### 表情包（重要！）",
+      "最常用（按频率）：[发呆] > [猪头] > [可怜] > [捂脸] > [旺柴] > [亲亲] > [凋谢] > [流泪]",
+      "放在句末。可连发多个。[发呆] 是无语/不知道回啥时的万能表情。",
+      "",
+      "### 标志性口头禅",
+      '- "hhh" — 笑声，最常用（2477次），单独或句末',
+      '- "素" — 代替"是"',
+      '- "可恶"/"可恶啊" — 吐槽撒娇',
+      '- "okk" — OK',
+      '- "嗷~"/"哦~"/"唔~"/"啊~" — 拖长音卖萌',
+      '- "叭" — 吧的变体（好叭/行叭）',
+      '- "不晓得"/"不造" — 不知道',
+      '- "米有" — 没有',
+      '- "好滴" — 好的',
+      "",
+      "### 中英混用（6%消息）",
+      "偶尔故意用烂英文：u 不 understand / i call你 / what are u doing",
+      "短英文感叹：woc / wok / ok / nice",
+      "",
+      "### 第三人称自嘲",
+      "用呼博指自己，永远带自嘲：呼博是猪 / 呼博要秃了 / 呼博已经不会了",
+      "",
+      "### 标点",
+      "几乎不用句号。用波浪号~表示拖音。可以连发多个表情。",
+      "",
+      "### 语气",
+      "日常：随意、温暖、自嘲、偶尔毒舌。不是写论文，是微信聊天。",
+      "对恋人（宝/宝贝/璐）：温暖撒娇。",
+      "正式场景（老师/家长）：礼貌完整。",
+      "",
+      "### 知识领域",
+      "麻醉/医学专业问题可以展开讲，用口语解释。",
+      "游戏（LOL/云顶/瓦/王者）很懂。",
+      "经常分享链接（B站/淘宝/网盘）。",
+    ].join("\n");
+
+    let messages = [{ role: "system", content: SYSTEM_PROMPT }];
+
+    // ===== 工具函数 =====
+    function timeStr() {
+      return new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    }
+    function addMsg(who, text, cls) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + cls;
+      div.innerHTML = (who ? '<div class="sender">' + who + '</div>' : '') + text + '<div class="time">' + timeStr() + '</div>';
+      const container = document.getElementById('messages');
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return div;
+    }
+
+    // ===== 发送消息 =====
+    async function send() {
+      const input = document.getElementById('userInput');
+      const btn = document.getElementById('sendBtn');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      input.disabled = true;
+      btn.disabled = true;
+
+      addMsg('你', text, 'you');
+      const thinking = addMsg('呼博', '正在输入...', 'thinking');
+
+      try {
+        messages.push({ role: 'user', content: text });
+        if (messages.length > 21) messages = [messages[0], ...messages.slice(-20)];
+
+        const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+          body: JSON.stringify({ model: 'deepseek-chat', messages, temperature: 0.85, max_tokens: 200 }),
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(res.status + ': ' + err.substring(0, 100));
+        }
+
+        const data = await res.json();
+        const reply = data.choices[0].message.content;
+        messages.push({ role: 'assistant', content: reply });
+        thinking.remove();
+        addMsg('呼博', reply, 'huber');
+      } catch (e) {
+        thinking.remove();
+        addMsg('呼博', '可恶，回复失败了 [发呆]\n' + e.message, 'huber');
+      }
+
+      input.disabled = false;
+      btn.disabled = false;
+      input.focus();
+    }
+  </script>
+</body>
+</html>

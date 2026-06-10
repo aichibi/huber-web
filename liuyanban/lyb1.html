@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glass Website</title>
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av-min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./liuyanban.css" />
+  </head>
+  <body>
+    <main>
+      <section class="glass">
+        <div class="dashboard">
+          <div class="user">
+            <div class="pic">
+              <div class="pic pic1"></div>
+            </div>
+            <h3>爱吃币</h3>
+            <p>哈哈哈哈哈</p>
+          </div>
+
+          <div class="links">
+            <div class="link">
+              <h2>首页</h2>
+            </div>
+            <div class="link">
+              <h2>留言</h2>
+            </div>
+            <div class="link">
+              <h2>未知</h2>
+            </div>
+            <div class="link">
+              <h2>其他</h2>
+            </div>
+          </div>
+          <div class="pro">
+            <h2>welcome to my Web</h2>
+            <img src="" alt="" />
+          </div>
+        </div>
+
+        <div class="liuyan">
+          <div class="liuyan">
+            <div class="status">
+              <h1>留言板</h1>
+              <!-- 输入框：昵称 -->
+              <input type="text" id="nameInput" placeholder="昵称（可选）" />
+              <!-- 新增：留言内容（textarea） -->
+              <textarea
+                id="messageInput"
+                placeholder="写下你的留言..."
+              ></textarea>
+              <!-- 发表按钮 -->
+              <button class="button" onclick="submitMessage()">发表</button>
+            </div>
+
+            <!-- 动态留言列表（原 .cards 区域） -->
+            <div class="cards" id="messageList">
+              <!-- 初始加载提示 -->
+              <p style="text-align: center; color: #658ec6; opacity: 0.7">
+                加载中...
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div class="circle1"></div>
+    <div class="circle2"></div>
+    <script>
+      // ========================
+      // 🔑 替换为你自己的 LeanCloud 密钥！
+      // ========================
+      const APP_ID = "rRCMItfdeWESfRheLmCpEBAB-gzGzoHsz"; // ←←← 在这里填你的 App ID
+      const APP_KEY = "你的AppKey"; // ←←← 在这里填你的 App Key
+      const SERVER_URL = `https://${APP_ID.slice(0, 8)}.lc-cn-n1-shared.com`;
+
+      // 初始化 LeanCloud
+      AV.init({
+        appId: APP_ID,
+        appKey: APP_KEY,
+        serverURL: SERVER_URL,
+      });
+
+      // ========================
+      // 📤 提交留言
+      // ========================
+      async function submitMessage() {
+        const name =
+          document.getElementById("nameInput").value.trim() || "匿名";
+        const text = document.getElementById("messageInput").value.trim();
+
+        if (!text) {
+          alert("留言内容不能为空！");
+          return;
+        }
+
+        try {
+          const Message = AV.Object.extend("Message");
+          const msg = new Message();
+          msg.set("name", name);
+          msg.set("text", text);
+          await msg.save();
+
+          // 清空输入框
+          document.getElementById("nameInput").value = "";
+          document.getElementById("messageInput").value = "";
+
+          // 重新加载留言
+          loadMessages();
+        } catch (error) {
+          console.error("提交失败:", error);
+          alert("留言失败，请检查网络或稍后再试");
+        }
+      }
+
+      // ========================
+      // 📥 加载留言
+      // ========================
+      async function loadMessages() {
+        try {
+          const query = new AV.Query("Message");
+          query.descending("createdAt"); // 最新在前
+          query.limit(30); // 最多显示30条
+          const results = await query.find();
+
+          const listEl = document.getElementById("messageList");
+
+          if (results.length === 0) {
+            listEl.innerHTML =
+              '<p style="text-align:center; color:#658ec6; opacity:0.7;">还没有留言，快来抢沙发吧！</p>';
+            return;
+          }
+
+          // 动态生成卡片（完全复用你原有的 .card 结构）
+          let html = "";
+          results.forEach((item) => {
+            const name = item.get("name") || "匿名";
+            const text = item.get("text") || "";
+            html += `
+          <div class="card">
+            <div class="card-info">
+              <h2>${name}</h2>
+              <p>${text}</p>
+            </div>
+          </div>
+        `;
+          });
+          listEl.innerHTML = html;
+        } catch (error) {
+          console.error("加载失败:", error);
+          document.getElementById("messageList").innerHTML =
+            '<p style="text-align:center; color:#ff6b6b;">加载留言失败 😢</p>';
+        }
+      }
+
+      // 页面加载完成后自动读取留言
+      window.addEventListener("load", loadMessages);
+    </script>
+  </body>
+</html>
