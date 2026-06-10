@@ -7,40 +7,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./liuyanban/liuyanban.css" />
   <style>
-    .entry-cards {
-      display: flex; flex-direction: column; gap: 1.5rem;
-      align-items: center; justify-content: center; width: 100%;
+    .welcome-area {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to right bottom, rgba(255,255,255,0.7), rgba(255,255,255,0.3));
+      border-radius: 1rem;
+      box-shadow: 4px 4px 12px rgba(122,122,122,0.2);
     }
-    .entry-card {
-      background: rgba(255,255,255,0.7);
-      border-radius: 1.5rem; padding: 2rem 1.5rem;
-      cursor: pointer; transition: all 0.3s ease;
-      box-shadow: 2px 2px 12px rgba(122,122,122,0.15);
-      text-align: center; width: 100%; max-width: 320px;
-      border: 1px solid rgba(255,255,255,0.5);
+    .welcome-area h1 {
+      font-size: clamp(2rem, 6vw, 3rem);
+      color: #426696;
+      margin: 0;
+      animation: float 3s ease-in-out infinite;
     }
-    .entry-card:hover {
-      transform: translateY(-5px);
-      background: rgba(255,255,255,0.9);
-      box-shadow: 4px 8px 24px rgba(122,122,122,0.25);
+    .welcome-area p {
+      font-size: 1rem;
+      color: #658ec6;
+      opacity: 0.7;
+      margin-top: 1rem;
     }
-    .entry-card .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-    .entry-card h2 {
-      font-size: 1.3rem; color: #426696; margin: 0 0 0.3rem;
-      font-weight: 600;
+    .welcome-area .deco {
+      font-size: 4rem;
+      margin-top: 1rem;
+      opacity: 0.6;
     }
-    .entry-card p {
-      font-size: 0.85rem; color: #658ec6; opacity: 0.8; margin: 0;
-    }
-    .entry-card .badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #65dfc9, #6cdbeb);
-      color: #fff; font-size: 0.7rem; padding: 2px 10px;
-      border-radius: 1rem; margin-top: 0.5rem;
-    }
-    @media (max-width: 600px) {
-      .entry-cards { padding: 0 1rem; }
-      .entry-card { max-width: 100%; padding: 1.5rem 1rem; }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
   </style>
 </head>
@@ -53,30 +50,22 @@
           <h3>爱吃币</h3>
           <p>总有些惊奇的际遇</p>
         </div>
+        <div class="links">
+          <div class="link active"><h2>首页</h2></div>
+          <div class="link" onclick="location.href='liuyanban/index.html'"><h2>留言</h2></div>
+          <div class="link" onclick="location.href='liuyanban/huber.html'"><h2>聊天</h2></div>
+          <div class="link"><h2>其他</h2></div>
+        </div>
         <div class="pro">
           <h2>welcome to my Web</h2>
           <img src="" alt="" />
         </div>
       </div>
 
-      <div class="liuyan">
-        <div class="status">
-          <h1>🌐 我的页面</h1>
-        </div>
-        <div class="entry-cards">
-          <div class="entry-card" onclick="location.href='liuyanban/index.html'">
-            <div class="icon">💬</div>
-            <h2>留言板</h2>
-            <p>玻璃拟态留言板 · Supabase 驱动</p>
-            <div class="badge">多人实时留言</div>
-          </div>
-          <div class="entry-card" onclick="location.href='liuyanban/huber.html'">
-            <div class="icon">🤖</div>
-            <h2>呼博 AI 聊天</h2>
-            <p>134,789 条消息蒸馏 · DeepSeek 驱动</p>
-            <div class="badge">AI 人格聊天</div>
-          </div>
-        </div>
+      <div class="welcome-area">
+        <div class="deco">🌊</div>
+        <h1>嗨，欢迎来访</h1>
+        <p>总有些惊奇的际遇</p>
       </div>
     </section>
   </main>
