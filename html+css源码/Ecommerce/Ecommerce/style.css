@@ -1,0 +1,377 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200&family=Roboto:wght@400;700&display=swap');
+
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+a, a:hover a:focus{
+    text-decoration: none;
+    outline: none;
+}
+
+li{
+    list-style: none;
+    display: inline-block;
+}
+
+.header{
+    background-color: #fff;
+    box-shadow: 0px 5px 10px rgba(91, 91, 91, 0.1);
+}
+
+.header_logo{
+    padding: 26px 0;
+    text-align: center;
+
+}
+
+.header_logo a{
+    display: inline-block;
+    color: #000;
+    font-size: 27px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.header_logo a span{
+    color: #ff7200;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.header_menu{
+    padding: 30px 0 27px;
+    text-align: center;
+}
+
+.header_menu ul li{
+    position: relative;
+    display: inline-block;
+    margin-right: 40px;
+}
+
+.header_menu ul li a{
+    color: #000;
+    font-size: 17px;
+    font-weight: 500;
+    display: block;
+    padding: 2px 0;
+    position: relative;
+    text-decoration: none;
+    outline: none;
+}
+
+.header_menu ul li a:after{
+    position: absolute;
+    content: '';
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #ff7200;
+    transition: all 0.5s;
+    transform: scale(0);
+
+}
+
+.header_menu ul li:hover a::after{
+    transform: scale(1);
+}
+
+.header_menu ul li.active a:after{
+    transform: scale(1);
+}
+
+.header_menu ul li:last-child{
+    margin-right: 0;
+
+}
+
+.header_right{
+    text-align: center;
+    padding: 30px 0 27px;
+}
+
+.header_right .header_right_auth{
+    display: inline-block;
+    margin-right: 25px;
+}
+
+.header_right .header_right_auth a{
+    font-size: 17px;
+    color: #666666;
+    position: relative;
+    margin-right: 13px;
+    text-decoration: none;
+    outline: none;
+}
+
+.header_right .header_right_auth a:last-child{
+    margin-right: 0;
+}
+
+.header_right .header_right_auth a:after{
+    position: absolute;
+    right: -12px;
+    top: 0px;
+    content: '/';
+    font-size: 16px;
+}
+
+.header_right .header_right_auth a:last-child:after{
+    display: none;
+}
+
+.img-fluid{
+    width: 103%;   
+  
+}
+
+.categories{
+    position: relative;
+    overflow: hidden;
+}
+
+.categories .categories_item{
+    position: relative;
+    height: 260px;
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.categories .categories_large_item{
+    height: 525px;
+}
+
+.categories .categories_text{
+    position: absolute;
+    left: 50px;
+    top: 100px;
+}
+
+.categories .categories_large_item .categories_text{
+    position: absolute;
+    left: 50px;max-width: 200px;
+}
+.categories .categories_large_item .categories_text p{
+    margin-bottom: 15px;
+}
+
+.categories .categories_text h1{
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.categories .categories_text h4{
+    color: #000;
+    font-weight: 700;
+}
+
+
+
+.categories .categories_text p{
+    margin-bottom: 10px;
+}
+
+.categories .categories_text a{
+    font-size: 14px;
+    color: #000;
+    text-transform: uppercase;
+    font-weight: 600;
+    position: relative;
+    padding: 0 0 3px;
+    display: inline-block;
+    text-decoration: none;
+    outline: none;
+}
+
+.categories .categories_text a:after{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background-color: #ff7200;
+    content: '';
+}
+
+.product{
+    padding-top: 60px;
+    padding-bottom: 50px;
+}
+
+.product .section-title{
+    margin-bottom: 45px;
+}
+
+.product .section-title h4{
+    columns: #000;
+    font-weight: 600;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+}
+
+.product .section-title h4:after{
+    position: absolute;
+    content: '';
+    left: 0;
+    bottom: -4px;
+    height: 2px;
+    width: 70px;
+    background-color: #ca1515;
+
+}
+
+.spad{
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+
+.product_item{
+    margin-bottom: 35px;
+}
+
+.product_item_pic{
+    height: 360px;
+    position: relative;
+    overflow: hidden;
+}
+
+.product_item_pic .label{
+    position: absolute;
+    font-size: 12px;
+    color: #fff;
+    font-weight: 500;
+    display: inline-block;
+    padding: 2px 8px;
+    text-transform: uppercase;
+    left: 10px;
+    top: 10px;
+
+}
+
+.product_item_pic .label.new{
+    background-color: #ff7200;
+}
+
+.product_item_text{
+    text-align: center;
+    padding-top: 22px;
+
+}
+
+.product_item_text h6 a{
+    font-size: 14px;
+    color: #000;
+}
+
+.product_item_text .rating{
+    line-height: 18px;
+    margin-bottom: 5px;
+}
+
+.product_item_text .rating i{
+    font-size: 10px;
+    color: #e3c01c;
+    margin-right: -4px;
+}
+
+.product_item_text .rating i:last-child{
+    margin-right: 0;
+}
+
+.product_item_text .product_price{
+    color: #000;
+    font-weight: 600;
+}
+
+.product_hover{
+    position: absolute;
+    left: 0;
+    width: 100%;
+    bottom: 30px;
+    text-align: center;
+
+}
+
+.product_hover li{
+    list-style: none;
+    display: inline-block;
+    margin-right: 10px;
+    position: relative;
+    top: 100px;
+    opacity: 0;
+}
+
+.product_hover li:last-child{
+    margin-right: 0;
+}
+
+.product_hover li:hover a{
+    background-color: #ff7200;
+}
+
+.product_hover li:hover a span{
+    color: #fff;
+    transform: rotate(360deg);
+}
+.product_hover li a{
+    font-size: 18px;
+    color: #000;
+    display: block;
+    width: 45px;
+    height: 45px;
+    background-color: #fff;
+    line-height: 45px;
+    border-radius: 50px;
+    box-shadow: 0 0 25px rgba(24, 24, 24, 0.4);
+    transition: all 0.5s;
+}
+
+.product_hover li a i{
+    position: relative;
+    display: inline-block;
+    transform: rotate(0);
+    transition: all 0.3s;
+}
+
+.product_item:hover .product_hover li{
+    opacity: 1;
+    top: 0;
+}
+
+.product_hover li:nth-child(1){
+    transition: all 0.4s ease 0.1s;
+}
+
+.product_hover li:nth-child(2){
+    transition: all 0.4s ease 0.15s;
+}
+.product_hover li:nth-child(3){
+    transition: all 0.4s ease 0.2s;
+}
+.product_hover li:nth-child(4){
+    transition: all 0.4s ease 0.25s;
+}
+
+.banner{
+    position: relative;
+    height: 350px;
+}
+
+.bg-img{
+    background-image: url(img/banner-1.jpg);
+    background-repeat: no-repeat;
+    
+    background-size: cover;
+}
+
+.owl-carousel{
+    z-index: 2;
+}

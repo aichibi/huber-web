@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>生日快乐</title>
+  </head>
+  <style>
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      font-family: "myFont";
+    }
+    @font-face {
+      font-family: "myFont";
+      src: url("C:\Users\HB\Desktop\web\birthday\文鼎习字体.ttf")
+        format("truetype");
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    .my-font {
+      font-family: "myFont";
+    }
+
+    .audio {
+      display: none;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4bc0c8, #c779d0, #feac5e);
+    }
+    .box {
+      height: 80vh;
+      width: 70%;
+      max-width: 600px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 4px;
+      box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px,
+        rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      hyphens: auto;
+      text-align: justify;
+      color: #333;
+      font-size: 20px;
+      line-height: 1.7;
+      letter-spacing: 0.034em;
+      font-family: "DFKai-SB";
+      overflow-y: scroll;
+    }
+    .box::-webkit-scrollbar {
+      display: none; /* Chrome Safari */
+    }
+    .ps {
+      font-size: 10px;
+      color: #feac5e;
+    }
+  </style>
+  <body>
+    <div class="box">
+        ps: <br>1.这首歌是李雪莱的《生日快乐》，我五音不全就不献丑了(u‿ฺu)
+        <br>2.我没什么可以送你，<br> &nbsp;&ensp;只能送你一段时间，一段好意，一段生命。
+        <br>3.我在想你。你在想我。 
+        <br>&nbsp;&ensp;我在想“你在想我”的景象。
+        <br>&nbsp;&ensp;想到你会因为我不在你身边而惆怅，
+        <br>&nbsp;&ensp;想到你会心神不安而蹙起眉头，
+        <br>&nbsp;&ensp;我的心也会因为想象到“你惆怅的思念”而微微颤动。
+        <br>&nbsp;&ensp;当我想到“你在想我”的时候，我的心弦似乎也被撩动。
+        <br>&nbsp;&ensp;你这个时候在做什么呢？有在想我吗？
+        <br>&nbsp;&ensp;可能有，也可能没有。可能在上课、睡觉、或是玩耍。
+        <br>&nbsp;&ensp;但“你在想我”这件事，终究并不是一件有很大可能的事。
+        <br>&nbsp;&ensp;所以，我仅仅是想象到“你在想我”，就很有感动。
+        <br>&nbsp;&ensp;我的感动，似乎不需要你真实的参与，也能体会到。<br>&nbsp;&ensp;我因为自己的想象而大有触动，我是在自我感动吗？
+        <br>&nbsp;&ensp;好像是的，也就是这样，我忽然明白，<br> &nbsp;&ensp;什么叫做：我喜欢你，但与你无关。<br/>
+        4.虽然但是，平常想找你聊天的时候点开和你的聊天框，却又不会和你聊，停一会又会退出去，很奇怪(*´I`*)
+      </div>
+
+      <div class="audio">
+        <audio
+          src="birthday.mp3"
+          id="aud"
+          autoplay="autoplay"
+          controls="auto"
+          loop="true"
+          preload="auto"
+        ></audio>
+      </div>
+      <p></p>
+    </div>
+  </body>
+</html>

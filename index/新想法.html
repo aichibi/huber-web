@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: #fcf8ee;
+    }
+    .flex {
+      display: flex;
+    }
+    .column {
+      flex-direction: column;
+    }
+    .row {
+      flex-direction: row;
+    }
+    .yinying {
+      width: 250px;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      text-align: center;
+    }
+  </style>
+  <body class="flex row">
+    <!--左栏-->
+    <div style="height: 100vh; z-index: 0">
+      <img src="aichibi1.png" style="height: 99vh" alt="" />
+    </div>
+    <!--右栏-->
+    <div class="flex column"></div>
+  </body>
+</html>

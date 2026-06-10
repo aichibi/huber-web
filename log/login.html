@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="log/login.css" />
+    <link rel="shortcut icon" href="logins.png" type="image/x-icon" />
+    <title>登录客户端</title>
+    <script
+      type="text/javascript"
+      src="http://pv.sohu.com/cityjson?ie=utf-8"
+    ></script>
+    <script src="https://static.runoob.com/assets/jquery-validation-1.14.0/lib/jquery.js"></script>
+    <script src="https://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
+    <script src="https://static.runoob.com/assets/jquery-validation-1.14.0/dist/localization/messages_zh.js"></script>
+
+    <script type="text/javascript">
+      function randoms() {
+        document.getElementById("id").value = "";
+        document.getElementById("password").value = "";
+      }
+
+      //参考链接：https://www.runoob.com/try/try.php?filename=jquery_validate_demo1
+
+      //添加检测机制 参考链接：https://blog.csdn.net/huangleijay/article/details/11569317
+      jQuery.validator.addMethod(
+        "mobile",
+        function (value, element) {
+          var length = value.length;
+          var mobile = /^(((13)|1[5-9]{1})+\d{9})$/;
+          return this.optional(element) || (length == 11 && mobile.test(value));
+        },
+        "手机号码格式错误"
+      );
+
+      // 字母和数字的验证
+      jQuery.validator.addMethod(
+        "chrnum",
+        function (value, element) {
+          var chrnum = /^([a-zA-Z0-9]+)$/;
+          return this.optional(element) || chrnum.test(value);
+        },
+        "只能输入数字和字母(字符A-Z, a-z, 0-9)"
+      );
+
+      //下面是表单拦截提示，可取消，否则无法跳转
+      /*
+	$.validator.setDefaults({
+		submitHandler: function() {
+			//alert("提交事件!");
+		}
+	});*/
+      $().ready(function () {
+        // 在键盘按下并释放及提交后验证提交表单
+        $("#loginform").validate({
+          rules: {
+            id: "required", //用户名
+            //密码是6位以上
+            password: {
+              required: true,
+              minlength: 6,
+              maxlength: 10,
+              chrnum: true,
+            },
+          },
+          messages: {
+            id: "请输入您的账户名",
+            password: {
+              required: "请输入密码",
+              minlength: "请输入6~10位密码",
+              maxlength: "请输入6~10位密码",
+            },
+          },
+        });
+      });
+    </script>
+    <style>
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+
+  <body onload="randoms()">
+    <section>
+      <!-- 背景颜色 -->
+      <div class="color"></div>
+      <div class="color"></div>
+      <div class="color"></div>
+      <div class="box">
+        <!-- 背景圆 -->
+        <div class="circle" style="--x: 0"></div>
+        <div class="circle" style="--x: 1"></div>
+        <div class="circle" style="--x: 2"></div>
+        <div class="circle" style="--x: 3"></div>
+        <div class="circle" style="--x: 4"></div>
+        <!-- 登录框 -->
+        <div class="container">
+          <div class="form">
+            <h2>登录</h2>
+            <form id="loginform" action="login.php" method="post" name="form1">
+              <div class="inputBox">
+                <input type="text" placeholder="账户" name="id" id="id" />
+              </div>
+              <div class="inputBox">
+                <input
+                  type="password"
+                  placeholder="密码"
+                  name="password"
+                  id="password"
+                />
+              </div>
+              <div class="inputBox">
+                <input type="submit" value="登录" id="input1" />
+              </div>
+              <p class="forget">
+                忘记密码?<a href="forget.html"> 点击这里 </a>
+              </p>
+              <p class="forget">没有账户?<a href="register.html"> 注册 </a></p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

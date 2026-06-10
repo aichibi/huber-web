@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    .photo .pic {
+      width: 80px;
+      height: 80px;
+      background-color: #fc8fee;
+      border-radius: 50%;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 100%;
+      border-radius: 110px;
+      transition: transform 0.5s ease-out;
+    }
+    .photo .pic:hover {
+      /* 变形      rotateZ ，X  ,Y Z轴，X轴，Y轴，三种旋转方向，角度可取负
+		度数也可写为turn.    1turn表示一圈
+		 */
+      transform: rotateZ(360deg);
+    }
+    .pic1 {
+      background-image: url(aichibi1.png);
+    }
+    .pic2 {
+      background-image: url(aichibi.jpg);
+    }
+  </style>
+  <body>
+    <section class="photo">
+      <div class="pic pic1"></div>
+      <div class="pic pic2"></div>
+    </section>
+  </body>
+</html>

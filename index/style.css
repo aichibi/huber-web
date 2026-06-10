@@ -1,0 +1,245 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+*流体排版：文字缩放 h1 {
+  color: #426696;
+  font-weight: 600;
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  opacity: 0.8;
+}
+
+h2,
+p {
+  color: #658ec6;
+  opacity: 0.8;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+}
+
+h3 {
+  color: #426696;
+  font-weight: 400;
+  opacity: 0.8;
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+}
+
+main {
+  font-family: "Poppins", sans-serif;
+  height: 800px;
+  background: linear-gradient(to right top, #65dfc9, #6cdbeb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.glass {
+  height: 600px;
+  background: white;
+  width: 60%;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.3)
+  );
+  border-radius: 1rem;
+  z-index: 2;
+  backdrop-filter: blur(1rem);
+  display: flex;
+}
+*装饰圆圈 .circle1,
+.circle2 {
+  background: white;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.3)
+  );
+  height: 14rem;
+  width: 14rem;
+  position: absolute;
+  border-radius: 50%;
+}
+
+.circle1 {
+  top: 5%;
+  right: 13%;
+}
+
+.circle2 {
+  bottom: 6%;
+  left: 13%;
+}
+*大屏左右，小平上下 .dashboard {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.3)
+  );
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  gap: 1.5rem;
+}
+.liuyan {
+  flex: 5;
+}
+
+.user img {
+  height: 80px;
+  border-radius: 40px;
+}
+
+.user h3 {
+  font-size: medium;
+  opacity: 0.8;
+  font-weight: 560;
+}
+
+.user p {
+  font-size: smaller;
+  margin-bottom: auto;
+}
+
+.link {
+  display: flex;
+  margin: 1rem 0rem;
+  padding: 10px 10px;
+  align-items: center;
+}
+
+.link h2 {
+  padding: 0px 10px;
+  font-size: x-large;
+  letter-spacing: 3px;
+}
+
+.links img {
+  height: 25px;
+}
+
+.pro {
+  background: linear-gradient(to right top, #65dfc9, #6cdbeb);
+  border-radius: 20px;
+  color: white;
+  padding: 10px;
+  display: flex;
+  position: relative;
+}
+.pro img {
+  height: 80px;
+  position: absolute;
+  right: 10%;
+  bottom: 10%;
+}
+
+.pro h2 {
+  width: 40%;
+  font-size: medium;
+  color: white;
+}
+
+/*Games*/
+
+.status input {
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.3)
+  );
+  border: none;
+  width: 50%;
+  padding: 1rem;
+  border-radius: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  color: #426696;
+  font-weight: 600;
+  opacity: 0.7;
+  font-size: medium;
+}
+
+.liuyan {
+  margin: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.card {
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.8)
+  );
+  border-radius: 1rem;
+  margin: 2rem 0rem;
+  padding: 1.5rem;
+  box-shadow: 6px 6px 20px rgba(122, 122, 122, 0.2);
+}
+
+.liuyan img {
+  height: 60px;
+}
+
+.liuyan h2 {
+  font-size: medium;
+}
+
+.liuyan h1 {
+  font-size: 35px;
+}
+
+.liuyan p {
+  font-size: large;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.button {
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.3)
+  );
+  border: none;
+  width: 80px;
+  padding: 1rem;
+  border-radius: 2rem;
+  margin-bottom: 1rem;
+  margin-left: 50px;
+  font-size: large;
+  color: #426696;
+  font-weight: 560;
+  opacity: 0.7;
+}
+.pic {
+  width: clamp(60px, 12vw, 80px);
+  height: clamp(60px, 12vw, 80px);
+  background-color: #fc8fee;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 100%;
+  border-radius: 110px;
+  transition: transform 0.5s ease-out;
+}
+.pic:hover {
+  /* 变形      rotateZ ，X  ,Y Z轴，X轴，Y轴，三种旋转方向，角度可取负
+度数也可写为turn.    1turn表示一圈
+ */
+  transform: rotateZ(180deg);
+}
+.pic1 {
+  background-image: url(aichibi.jpg);
+}

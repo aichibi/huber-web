@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>opacity</title>
+    <style type="text/css">
+      .background {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #4bc0c8, #c779d0, #feac5e);
+      }
+      .page {
+        width: 200px;
+        padding: 10px 20px;
+        border: 1px solid #eee;
+      }
+      .container {
+        overflow: hidden;
+      }
+      .container > .options {
+        opacity: 1;
+        transition: all 0.5s;
+      }
+      .container > .btn {
+        color: #4c98f7;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .container > .hide {
+        display: none;
+      }
+      .container > .fold {
+        opacity: 0;
+      }
+      p#p1 {
+        position: absolute;
+
+        top: 20000vh;
+
+        left: 20vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div class="container">
+        <div class="btn p#p1" onclick="operate(this)" unfold="1">生日快乐</div>
+        <div class="options">
+          <div class="option"><div class="background"></div></div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    function operate(btn) {
+      const optionsNode = document.querySelector(".container > .options");
+      const unfold = btn.getAttribute("unfold");
+      if (unfold && unfold === "1") {
+        btn.innerText = "生日快乐";
+        optionsNode.classList.add("fold");
+        const finish = () => {
+          optionsNode.classList.add("hide");
+          optionsNode.removeEventListener("transitionend", finish); // 移除监听器
+        };
+        optionsNode.addEventListener("transitionend", finish); // 添加监听器
+      } else {
+        btn.innerText = "生日快乐";
+        optionsNode.classList.remove("hide");
+        setTimeout(() => optionsNode.classList.remove("fold"));
+      }
+      btn.setAttribute("unfold", unfold === "0" ? "1" : "0");
+    }
+  </script>
+</html>
