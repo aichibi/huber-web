@@ -382,7 +382,6 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
           required: ["city"]
         }
       }
-    }
     }];
 
     // ===== 执行工具调用 =====
@@ -396,7 +395,6 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
       }
       if (name === "get_weather") {
         try {
-          // Step 1: geocode city name
           const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(args.city) + "&count=1&language=zh";
           const geoRes = await fetch(geoUrl);
           const geoData = await geoRes.json();
@@ -404,29 +402,11 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
           const loc = geoData.results[0];
           const lat = loc.latitude, lon = loc.longitude;
           const cityName = loc.name + (loc.admin1 ? "," + loc.admin1 : "") + (loc.country ? "," + loc.country : "");
-
-          // Step 2: get weather
           const url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true&timezone=Asia/Shanghai";
           const res = await fetch(url);
           const data = await res.json();
           const w = data.current_weather;
-        try {
-          // Open-Meteo 免费天气API
-          // Using Open-Meteo geocoding API for any city
-          const cityCoords = { "北京": [39.9,116.4], "上海":[31.2,121.5], "广州":[23.1,113.3],
-            "深圳":[22.5,114.1], "西安":[34.3,108.9], "武汉":[30.6,114.3], "杭州":[30.3,120.2],
-            "成都":[30.6,104.1], "重庆":[29.6,106.5], "南京":[32.1,118.8], "延安":[36.6,109.5],
-            "南昌":[28.7,115.9], "天津":[39.1,117.2], "长沙":[28.2,113.0] };
-          const coords = cityCoords[args.city] || [35,110];
-          const url = "https://api.open-meteo.com/v1/forecast?latitude=" + coords[0] +
-            "&longitude=" + coords[1] + "&current_weather=true&timezone=Asia/Shanghai";
-          const res = await fetch(url);
-          const data = await res.json();
-          const w = data.current_weather;
-          const weatherMap = {0:"晴天",1:"大部晴",2:"多云",3:"阴天",45:"雾",48:"霜雾",
-            51:"小雨",53:"中雨",55:"大雨",61:"小阵雨",63:"中阵雨",65:"大阵雨",
-            71:"小雪",73:"中雪",75:"大雪",77:"雪粒",80:"小阵雨",81:"中阵雨",82:"大阵雨",
-            85:"小雪",86:"大雪",95:"雷暴",96:"雷暴+冰雹",99:"强雷暴+冰雹"};
+          const weatherMap = {0:"晴天",1:"大部晴",2:"多云",3:"阴天",45:"雾",48:"霜雾",51:"小雨",53:"中雨",55:"大雨",61:"小阵雨",63:"中阵雨",65:"大阵雨",71:"小雪",73:"中雪",75:"大雪",77:"雪粒",80:"小阵雨",81:"中阵雨",82:"大阵雨",85:"小雪",86:"大雪",95:"雷暴",96:"雷暴+冰雹",99:"强雷暴+冰雹"};
           const weatherDesc = weatherMap[w.weathercode] || ("天气码"+w.weathercode);
           return cityName + "当前" + weatherDesc + "，温度" + w.temperature + "°C，风速" + w.windspeed + "km/h";
         } catch(e) { return "天气查询失败"; }
