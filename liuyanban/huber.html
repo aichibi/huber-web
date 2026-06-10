@@ -268,6 +268,18 @@
       return div;
     }
 
+    // 微信表情转Emoji
+    const EMOJI = {
+      "[发呆]": "😶", "[猪头]": "🐷", "[可怜]": "🥺", "[捂脸]": "🤭",
+      "[旺柴]": "🐶", "[亲亲]": "😘", "[凋谢]": "🥀", "[流泪]": "😢",
+      "[偷笑]": "🤭", "[苦涩]": "😩", "[叹气]": "😔", "[发抖]": "😰",
+      "[敲打]": "💢", "[Emm]": "🤔", "[害羞]": "😊", "[发怒]": "😡",
+      "[呲牙]": "😄", "[强]": "👍", "[玫瑰]": "🌹", "[破涕为笑]": "😂",
+    };
+    function convertEmoji(text) {
+      return text.replace(/\[[^\]]+\]/g, function(m) { return EMOJI[m] || m; });
+    }
+
     // ===== 发送消息 =====
     async function send() {
       const input = document.getElementById('userInput');
