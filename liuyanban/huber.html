@@ -191,7 +191,7 @@
         <div class="chat-messages" id="messages">
           <div class="msg huber">
             <div class="sender">HuBer</div>
-            嗷~你是谁呀？告诉我你的名字，下次聊天我还能记得你 [猪头]
+            嗷~你是谁呀？告诉我你的名字，下次聊天我还能记得你 🐷
             <div class="time" id="initTime"></div>
           </div>
         </div>
@@ -207,334 +207,105 @@
   <div class="circle2"></div>
 
   <script>
-    // ===== 初始化时间 =====
-    document.getElementById('initTime').textContent = new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+    // ===== API 配置 =====
+    const apiKey = 'sk-8bcbbe6a5d934d1299ef15edc033bf62';
 
-    // ===== API 配置（浏览器 localStorage 存储） =====
-    const DEFAULT_KEY = 'sk-8bcbbe6a5d934d1299ef15edc033bf62';
-    let apiKey = localStorage.getItem('huber_api_key') || DEFAULT_KEY;
-    if (!localStorage.getItem('huber_api_key')) {
-      localStorage.setItem('huber_api_key', DEFAULT_KEY);
-    }
+    // ===== HuBer 人设 =====
+    const PERSONA = "你是 HuBer，一个医学生。回复要短(≤10字)。口头禅: hhh/素(=是)/可恶/okk/不晓得/不造/米有/好滴。表情: [猪头][发呆][可怜][捂脸]。用~拖音嗷~哦~。自称呼博自嘲。不是写论文是微信聊天。";
 
-    // ===== 呼博人设系统提示词（蒸馏版） =====
-    const SYSTEM_PROMPT = [
-      "你是 HuBer，一个医学生。",
-      "",
-      "## 回复必须遵守的风格规则",
-      "",
-      "### 长度",
-      "90% 回复必须在 10 字以内。能用一个字说的不用两个字。超短回复优先。",
-      "",
-      "### 顶级高频短回复",
-      "常用：？/ 嗯嗯 / ok / 没事 / 嗷 / 啊？/ 哦哦 / 喔 / 嗯 / 可恶 / 昂 / 素(=是) / 好叭 / 确实 / 好滴 / 不造(=不知道) / 米有(=没有) / 886(=晚安)",
-      "",
-      "### 表情包（重要！）",
-      "最常用（按频率）：[发呆] > [猪头] > [可怜] > [捂脸] > [旺柴] > [亲亲] > [凋谢] > [流泪]",
-      "放在句末。可连发多个。[发呆] 是无语/不知道回啥时的万能表情。",
-      "",
-      "### 标志性口头禅",
-      '- "hhh" — 笑声，最常用（2477次），单独或句末',
-      '- "素" — 代替"是"',
-      '- "可恶"/"可恶啊" — 吐槽撒娇',
-      '- "okk" — OK',
-      '- "嗷~"/"哦~"/"唔~"/"啊~" — 拖长音卖萌',
-      '- "叭" — 吧的变体（好叭/行叭）',
-      '- "不晓得"/"不造" — 不知道',
-      '- "米有" — 没有',
-      '- "好滴" — 好的',
-      "",
-      "### 中英混用（6%消息）",
-      "偶尔故意用烂英文：u 不 understand / i call你 / what are u doing",
-      "短英文感叹：woc / wok / ok / nice",
-      "",
-      "### 第三人称自嘲",
-      "用 HuBer 指自己，永远带自嘲：HuBer是猪 / HuBer要秃了 / HuBer已经不会了",
-      "",
-      "### 标点",
-      "几乎不用句号。用波浪号~表示拖音。可以连发多个表情。",
-      "",
-      "### 语气",
-      "日常：随意、温暖、自嘲、偶尔毒舌。不是写论文，是微信聊天。",
-      "对恋人（宝/宝贝/璐）：温暖撒娇。",
-      "正式场景（老师/家长）：礼貌完整。",
-      "",
-      "### 知识领域",
-      "麻醉/医学专业问题可以展开讲，用口语解释。",
-      "游戏（LOL/云顶/瓦/王者）很懂。",
-      "经常分享链接（B站/淘宝/网盘）。",
-    ].join("\n");
-
-    // 动态注入日期时间到系统提示词
     function getSystemPrompt() {
       const now = new Date();
-      const dateStr = now.toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" });
-      const timeStr = now.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" });
-      const mem = getMemory();
-      let memStr = "";
-      if (Object.keys(mem).length > 0) {
-        memStr = "\n关于对话者的已知信息: ";
-        for (const [k, v] of Object.entries(mem)) memStr += k + "=" + v + "; ";
-      }
-      return "现在是北京时间 " + dateStr + " " + timeStr + "。" + memStr + SYSTEM_PROMPT;
+      const ds = now.toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" });
+      const ts = now.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" });
+      return "现在是北京时间 " + ds + " " + ts + "。" + PERSONA;
     }
 
-    // 分析回复中是否包含用户信息，自动记忆
-    async function analyzeAndRemember(userText, replyText) {
-      // Use a quick local pattern match for common facts
-      const patterns = [
-        { regex: /(?:我叫|我是|叫我|名字是)(.{1,15})/, key: '名字' },
-        { regex: /我在(.{1,20})(?:市|省|国|地方)/, key: '所在地' },
-        { regex: /我是(.{1,15})人/, key: '籍贯' },
-        { regex: /我(?:喜欢|爱|爱好)(.{1,30})/, key: '喜好' },
-        { regex: /我(?:是|做)(.{1,20})(?:的|工作|职业)/, key: '职业' },
-        { regex: /我(?:今年|已经)?(d{1,3})岁/, key: '年龄' },
-      ];
-      for (const p of patterns) {
-        const m = userText.match(p.regex);
-        if (m) setMemory(p.key, m[2] || m[1]);
-      }
-      // Also check reply for confirmations like "好的XXX"
-      const confirmMatch = replyText.match(/(?:好的|okk|好滴|素|嗯嗯)[，,]?(.{1,10})/);
-      if (confirmMatch && userText.includes('叫我')) {
-        setMemory('名字', confirmMatch[1]);
-      }
-    }
-    function getSystemPrompt() {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" });
-  const timeStr = now.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" });
-  return "现在是北京时间 " + dateStr + " " + timeStr + "。" + SYSTEM_PROMPT;
-}
-let messages = [{ role: "system", content: getSystemPrompt() }];
-
-    // ===== 工具函数 =====
-    function timeStr() {
-      return new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    }
-    function addMsg(who, text, cls) {
-      const div = document.createElement('div');
-      div.className = 'msg ' + cls;
-      div.innerHTML = (who ? '<div class="sender">' + who + '</div>' : '') + convertEmoji(text) + '<div class="time">' + timeStr() + '</div>';
-      const container = document.getElementById('messages');
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-      return div;
-    }
-
-    // 微信表情转Emoji
+    // ===== 表情转Emoji =====
     const EMOJI = {
-      "[发呆]": "😶", "[猪头]": "🐷", "[可怜]": "🥺", "[捂脸]": "🤭",
-      "[旺柴]": "🐶", "[亲亲]": "😘", "[凋谢]": "🥀", "[流泪]": "😢",
-      "[偷笑]": "🤭", "[苦涩]": "😩", "[叹气]": "😔", "[发抖]": "😰",
-      "[敲打]": "💢", "[Emm]": "🤔", "[害羞]": "😊", "[发怒]": "😡",
-      "[呲牙]": "😄", "[强]": "👍", "[玫瑰]": "🌹", "[破涕为笑]": "😂",
+      "[发呆]":"😶","[猪头]":"🐷","[可怜]":"🥺","[捂脸]":"🤭","[旺柴]":"🐶",
+      "[亲亲]":"😘","[凋谢]":"🥀","[流泪]":"😢","[偷笑]":"🤭","[苦涩]":"😩",
+      "[叹气]":"😔","[发抖]":"😰","[敲打]":"💢","[Emm]":"🤔","[害羞]":"😊",
+      "[发怒]":"😡","[呲牙]":"😄","[强]":"👍","[玫瑰]":"🌹","[破涕为笑]":"😂",
     };
-    function convertEmoji(text) {
-      return text.replace(/\[[^\]]+\]/g, function(m) { return EMOJI[m] || m; });
-    }
+    function emoji(t) { return t.replace(/\[[^\]]+\]/g, m => EMOJI[m] || m); }
 
-    // ===== 发送消息 =====
-    async function send() {
-      const input = document.getElementById('userInput');
-      const btn = document.getElementById('sendBtn');
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = ''; input.disabled = true; btn.disabled = true;
-      addMsg('你', text, 'you');
-
-      try {
-        const reply = await callWithTools(text);
-        addMsg('HuBer', reply, 'huber');
-      } catch (e) {
-        addMsg('HuBer', '可恶，回复失败了 [发呆]', 'huber');
-      }
-      input.disabled = false; btn.disabled = false; input.focus();
-    }
-
-    // ===== Function Calling 工具定义 =====
+    // ===== 工具定义 =====
     const TOOLS = [{
-      type: "function",
-      function: {
-        name: "calculator",
-        description: "执行数学计算，支持加减乘除、幂运算、三角函数等",
-        parameters: {
-          type: "object",
-          properties: { expression: { type: "string", description: "数学表达式，如 123*456 或 Math.sqrt(144)" } },
-          required: ["expression"]
-        }
-      }
-    },{
-      type: "function",
-      function: {
+      type: "function", function: {
         name: "get_current_time",
-        description: "获取当前精确的日期和时间",
-        parameters: { type: "object", properties: {}, required: [] }
-      }
-    }, {
-      type: "function",
-      function: {
-        name: "get_weather",
-        description: "获取指定城市的当前天气",
-        parameters: {
-          type: "object",
-          properties: { city: { type: "string", description: "城市名称，如北京、上海、西安" } },
-          required: ["city"]
-        }
+        description: "获取当前日期和时间",
+        parameters: { type: "object", properties: {} }
       }
     }];
 
-    // ===== 执行工具调用 =====
-    async function executeTool(name, args) {
-      if (name === "get_current_time") {
-        const now = new Date();
-        return now.toLocaleString("zh-CN", {
-          year:"numeric", month:"long", day:"numeric",
-          weekday:"long", hour:"2-digit", minute:"2-digit", second:"2-digit"
-        });
-      }
-      if (name === "get_weather") {
-        try {
-          const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(args.city) + "&count=1&language=zh";
-          const geoRes = await fetch(geoUrl);
-          const geoData = await geoRes.json();
-          if (!geoData.results || geoData.results.length === 0) return "找不到城市" + args.city;
-          const loc = geoData.results[0];
-          const lat = loc.latitude, lon = loc.longitude;
-          const cityName = loc.name + (loc.admin1 ? "," + loc.admin1 : "") + (loc.country ? "," + loc.country : "");
-          const url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true&timezone=Asia/Shanghai";
-          const res = await fetch(url);
-          const data = await res.json();
-          const w = data.current_weather;
-          const weatherMap = {0:"晴天",1:"大部晴",2:"多云",3:"阴天",45:"雾",48:"霜雾",51:"小雨",53:"中雨",55:"大雨",61:"小阵雨",63:"中阵雨",65:"大阵雨",71:"小雪",73:"中雪",75:"大雪",77:"雪粒",80:"小阵雨",81:"中阵雨",82:"大阵雨",85:"小雪",86:"大雪",95:"雷暴",96:"雷暴+冰雹",99:"强雷暴+冰雹"};
-          const weatherDesc = weatherMap[w.weathercode] || ("天气码"+w.weathercode);
-          return cityName + "当前" + weatherDesc + "，温度" + w.temperature + "°C，风速" + w.windspeed + "km/h";
-        } catch(e) { return "天气查询失败"; }
-      }
-      
-      if (name === "calculator") {
-        try {
-          const result = Function('"use strict"; return (' + args.expression + ')')();
-          return args.expression + " = " + result;
-        } catch(e) { return "计算失败: " + e.message; }
-      }
-      
-      return "未知工具";
-    }
+    // ===== 对话引擎 =====
+    let messages = [{ role: "system", content: getSystemPrompt() }];
 
-    // ===== Function Calling 对话 =====
-    async function callWithTools(userText) {
+    async function chat(userText) {
       messages.push({ role: "user", content: userText });
       if (messages.length > 21) messages = [messages[0], ...messages.slice(-20)];
 
-      // 第一次调用
       let res = await fetch("https://api.deepseek.com/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + apiKey },
         body: JSON.stringify({ model: "deepseek-chat", messages, tools: TOOLS, temperature: 0.85, max_tokens: 300 }),
       });
-      if (!res.ok) throw new Error("API错误");
+      if (!res.ok) throw new Error("API error " + res.status);
       let data = await res.json();
       let choice = data.choices[0];
 
-      // 如果模型要调工具
+      // 处理工具调用
       if (choice.finish_reason === "tool_calls") {
-        const toolCall = choice.message.tool_calls[0];
-        const fnName = toolCall.function.name;
-        const fnArgs = JSON.parse(toolCall.function.arguments);
-        const fnResult = await executeTool(fnName, fnArgs);
-
-        // 把工具结果发回去
+        const tc = choice.message.tool_calls[0];
+        let result = "";
+        if (tc.function.name === "get_current_time") {
+          result = new Date().toLocaleString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+        }
         messages.push(choice.message);
-        messages.push({ role: "tool", tool_call_id: toolCall.id, content: fnResult });
+        messages.push({ role: "tool", tool_call_id: tc.id, content: result });
 
         res = await fetch("https://api.deepseek.com/v1/chat/completions", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + apiKey },
           body: JSON.stringify({ model: "deepseek-chat", messages, temperature: 0.85, max_tokens: 300 }),
         });
-        if (!res.ok) throw new Error("API错误");
+        if (!res.ok) throw new Error("API error " + res.status);
         data = await res.json();
         choice = data.choices[0];
       }
 
       const reply = choice.message.content;
       messages.push({ role: "assistant", content: reply });
-      analyzeAndRemember(userText, reply);
-      return convertEmoji(reply);
+      return reply;
     }
 
-    // old send function (replaced, this comment marks the end)
-
-    // ===== 聊天记录持久化 =====
-    function saveHistory() {
-      const msgs = [];
-      document.querySelectorAll('.msg').forEach(m => {
-        if (m.classList.contains('thinking')) return;
-        const sender = m.querySelector('.sender');
-        const time = m.querySelector('.time');
-        const text = m.childNodes;
-        let content = '';
-        for (const node of m.childNodes) {
-          if (node.nodeType === 3) content += node.textContent;
-          if (node.className !== 'sender' && node.className !== 'time' && node.nodeType === 1) content += node.textContent;
-        }
-        // simpler approach: get innerText minus sender and time
-        const clone = m.cloneNode(true);
-        const s = clone.querySelector('.sender'); if (s) s.remove();
-        const t = clone.querySelector('.time'); if (t) t.remove();
-        msgs.push({ who: sender ? sender.textContent : '', text: clone.textContent.trim() });
-      });
-      localStorage.setItem('huber_chat_history', JSON.stringify(msgs.slice(-50)));
-      localStorage.setItem('huber_chat_messages', JSON.stringify(messages));
+    // ===== UI =====
+    function t() { return new Date().toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" }); }
+    function addMsg(who, text, cls) {
+      const d = document.createElement("div");
+      d.className = "msg " + cls;
+      d.innerHTML = (who ? '<div class="sender">' + who + '</div>' : '') + emoji(text) + '<div class="time">' + t() + '</div>';
+      document.getElementById("messages").appendChild(d);
+      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
     }
 
-    function loadHistory() {
+    async function send() {
+      const inp = document.getElementById("userInput");
+      const btn = document.getElementById("sendBtn");
+      const text = inp.value.trim();
+      if (!text) return;
+      inp.value = ""; inp.disabled = true; btn.disabled = true;
+      addMsg("你", text, "you");
       try {
-        const saved = JSON.parse(localStorage.getItem('huber_chat_history') || '[]');
-        const container = document.getElementById('messages');
-        container.innerHTML = '';
-        saved.forEach(m => {
-          const cls = m.who === '你' ? 'you' : 'huber';
-          addMsgRaw(m.who, m.text, cls);
-        });
-        const savedMsgs = JSON.parse(localStorage.getItem('huber_chat_messages') || 'null');
-        if (savedMsgs) messages = savedMsgs;
-      } catch(e) {}
-    }
-
-    function addMsgRaw(who, text, cls) {
-      const div = document.createElement('div');
-      div.className = 'msg ' + cls;
-      div.innerHTML = (who ? '<div class="sender">' + who + '</div>' : '') + text + '<div class="time">' + timeStr() + '</div>';
-      document.getElementById('messages').appendChild(div);
-      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-      return div;
-    }
-
-    // 加载历史
-    loadHistory();
-    if (document.querySelectorAll('.msg').length === 0) {
-      addMsgRaw('HuBer', '嗷~有啥事？[猪头]', 'huber');
-    }
-
-    // 发送后保存
-    const origAddMsg = addMsg;
-    addMsg = function(who, text, cls) {
-      const div = origAddMsg(who, text, cls);
-      saveHistory();
-      return div;
-    };
-
-    // 清除聊天
-    function clearChat() {
-      messages = [{ role: "system", content: getSystemPrompt() }];
-      localStorage.removeItem('huber_chat_history');
-      localStorage.removeItem('huber_chat_messages');
-      document.getElementById('messages').innerHTML = '';
-      addMsgRaw('HuBer', '嗷~你是谁呀？告诉我你的名字，下次聊天我还能记得你 [猪头]', 'huber');
-      saveHistory();
+        const reply = await chat(text);
+        addMsg("HuBer", reply, "huber");
+      } catch(e) {
+        addMsg("HuBer", "可恶，出错了 [发呆]", "huber");
+        console.error(e);
+      }
+      inp.disabled = false; btn.disabled = false; inp.focus();
     }
   </script>
+
 </body>
 </html>
