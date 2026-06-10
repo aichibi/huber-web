@@ -273,7 +273,53 @@ function buildSystemPrompt() {
   return SYSTEM_PROMPT.replace("今天是", "现在是北京时间 " + dateStr + " " + timeStr + "。今天是");
 }
 // 动态注入日期时间
-function getSystemPrompt() {
+
+    // ===== 深度记忆系统 =====
+    const MEMORY_KEY = 'huber_user_memory';
+
+    function getMemory() {
+      try { return JSON.parse(localStorage.getItem(MEMORY_KEY) || '{}'); } catch { return {}; }
+    }
+    function setMemory(key, value) {
+      const mem = getMemory();
+      mem[key] = value;
+      localStorage.setItem(MEMORY_KEY, JSON.stringify(mem));
+    }
+
+    // 在系统提示词中注入用户记忆
+    function getSystemPrompt() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" });
+      const timeStr = now.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" });
+      const mem = getMemory();
+      let memStr = "";
+      if (Object.keys(mem).length > 0) {
+        memStr = "\n关于对话者的已知信息: ";
+        for (const [k, v] of Object.entries(mem)) memStr += k + "=" + v + "; ";
+      }
+      return "现在是北京时间 " + dateStr + " " + timeStr + "。" + memStr + SYSTEM_PROMPT;
+    }
+
+    // 分析回复中是否包含用户信息，自动记忆
+    async function analyzeAndRemember(userText, replyText) {
+      // Use a quick local pattern match for common facts
+      const patterns = [
+        { regex: /我叫(.{1,10})/, key: '名字' },
+        { regex: /我在(.{1,20})/, key: '所在地' },
+        { regex: /我是(.{1,15})人/, key: '籍贯' },
+        { regex: /我(喜欢|爱)(.{1,30})/, key: '喜好' },
+      ];
+      for (const p of patterns) {
+        const m = userText.match(p.regex);
+        if (m) setMemory(p.key, m[2] || m[1]);
+      }
+      // Also check reply for confirmations like "好的XXX"
+      const confirmMatch = replyText.match(/好的[，,]?(.{1,10})/);
+      if (confirmMatch && userText.includes('叫我')) {
+        setMemory('名字', confirmMatch[1]);
+      }
+    }
+    function getSystemPrompt() {
   const now = new Date();
   const dateStr = now.toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" });
   const timeStr = now.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit" });
@@ -355,6 +401,18 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
           required: ["city"]
         }
       }
+    }, {
+      type: "function",
+      function: {
+        name: "web_search",
+        description: "搜索互联网获取最新信息",
+        parameters: {
+          type: "object",
+          properties: { query: { type: "string", description: "搜索关键词" } },
+          required: ["query"]
+        }
+      }
+    }
     }];
 
     // ===== 执行工具调用 =====
@@ -368,7 +426,23 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
       }
       if (name === "get_weather") {
         try {
+          // Step 1: geocode city name
+          const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(args.city) + "&count=1&language=zh";
+          const geoRes = await fetch(geoUrl);
+          const geoData = await geoRes.json();
+          if (!geoData.results || geoData.results.length === 0) return "找不到城市" + args.city;
+          const loc = geoData.results[0];
+          const lat = loc.latitude, lon = loc.longitude;
+          const cityName = loc.name + (loc.admin1 ? "," + loc.admin1 : "") + (loc.country ? "," + loc.country : "");
+
+          // Step 2: get weather
+          const url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true&timezone=Asia/Shanghai";
+          const res = await fetch(url);
+          const data = await res.json();
+          const w = data.current_weather;
+        try {
           // Open-Meteo 免费天气API
+          // Using Open-Meteo geocoding API for any city
           const cityCoords = { "北京": [39.9,116.4], "上海":[31.2,121.5], "广州":[23.1,113.3],
             "深圳":[22.5,114.1], "西安":[34.3,108.9], "武汉":[30.6,114.3], "杭州":[30.3,120.2],
             "成都":[30.6,104.1], "重庆":[29.6,106.5], "南京":[32.1,118.8], "延安":[36.6,109.5],
@@ -384,7 +458,7 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
             71:"小雪",73:"中雪",75:"大雪",77:"雪粒",80:"小阵雨",81:"中阵雨",82:"大阵雨",
             85:"小雪",86:"大雪",95:"雷暴",96:"雷暴+冰雹",99:"强雷暴+冰雹"};
           const weatherDesc = weatherMap[w.weathercode] || ("天气码"+w.weathercode);
-          return args.city + "当前" + weatherDesc + "，温度" + w.temperature + "°C，风速" + w.windspeed + "km/h";
+          return cityName + "当前" + weatherDesc + "，温度" + w.temperature + "°C，风速" + w.windspeed + "km/h";
         } catch(e) { return "天气查询失败"; }
       }
       
@@ -393,6 +467,22 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
           const result = Function('"use strict"; return (' + args.expression + ')')();
           return args.expression + " = " + result;
         } catch(e) { return "计算失败: " + e.message; }
+      }
+      
+      if (name === "web_search") {
+        try {
+          const url = "https://api.duckduckgo.com/?q=" + encodeURIComponent(args.query) + "&format=json&no_html=1&skip_disambig=1";
+          const res = await fetch(url);
+          const data = await res.json();
+          let result = "";
+          if (data.AbstractText) result += data.AbstractText + " ";
+          if (data.AbstractURL) result += "(来源: " + data.AbstractURL + ") ";
+          if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+            result += "相关内容: ";
+            data.RelatedTopics.slice(0, 3).forEach(t => { if (t.Text) result += t.Text + " "; });
+          }
+          return result.trim() || "未找到相关信息";
+        } catch(e) { return "搜索失败"; }
       }
       return "未知工具";
     }
@@ -435,6 +525,7 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
 
       const reply = choice.message.content;
       messages.push({ role: "assistant", content: reply });
+      analyzeAndRemember(userText, reply);
       return convertEmoji(reply);
     }
 
