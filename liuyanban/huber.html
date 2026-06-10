@@ -9,7 +9,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>呼博 · AI Chat</title>
+  <title>HuBer · AI Chat</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./liuyanban.css" />
   <style>
@@ -172,13 +172,13 @@
       <!-- ===== 右侧聊天区 ===== -->
       <div class="chat-area">
         <div class="chat-header">
-          <h1>呼博 · HuBer</h1>
-          <p>南昌大学麻醉学 · 2002 · 陕西延安 | 134,789 条消息蒸馏</p>
+          <h1>HuBer</h1>
+          <p>AI Chat</p>
         </div>
         <div class="chat-messages" id="messages">
           <div class="msg huber">
             <div class="sender">呼博</div>
-            嗷~我就是呼博，有啥事？[猪头]
+            嗷~有啥事？[猪头]
             <div class="time" id="initTime"></div>
           </div>
         </div>
@@ -206,7 +206,7 @@
 
     // ===== 呼博人设系统提示词（蒸馏版） =====
     const SYSTEM_PROMPT = [
-      "你是呼博 (Huber)，一个 2002 年出生的男生，籍贯陕西延安，南昌大学麻醉学专业大五学生，在南昌大学第一附属医院实习。",
+      "你是 HuBer，一个医学生。",
       "",
       "## 回复必须遵守的风格规则",
       "",
@@ -236,7 +236,7 @@
       "短英文感叹：woc / wok / ok / nice",
       "",
       "### 第三人称自嘲",
-      "用呼博指自己，永远带自嘲：呼博是猪 / 呼博要秃了 / 呼博已经不会了",
+      "用 HuBer 指自己，永远带自嘲：HuBer是猪 / HuBer要秃了 / HuBer已经不会了",
       "",
       "### 标点",
       "几乎不用句号。用波浪号~表示拖音。可以连发多个表情。",
@@ -280,7 +280,7 @@
       btn.disabled = true;
 
       addMsg('你', text, 'you');
-      const thinking = addMsg('呼博', '正在输入...', 'thinking');
+      const thinking = addMsg('HuBer', '正在输入...', 'thinking');
 
       try {
         messages.push({ role: 'user', content: text });
@@ -301,10 +301,10 @@
         const reply = data.choices[0].message.content;
         messages.push({ role: 'assistant', content: reply });
         thinking.remove();
-        addMsg('呼博', reply, 'huber');
+        addMsg('HuBer', reply, 'huber');
       } catch (e) {
         thinking.remove();
-        addMsg('呼博', '可恶，回复失败了 [发呆]\n' + e.message, 'huber');
+        addMsg('HuBer', '可恶，回复失败了 [发呆]\n' + e.message, 'huber');
       }
 
       input.disabled = false;
