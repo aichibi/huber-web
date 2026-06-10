@@ -183,9 +183,10 @@
 
       <!-- ===== 右侧聊天区 ===== -->
       <div class="chat-area">
-        <div class="chat-header">
+        <div class="chat-header" style="position:relative;">
           <h1>HuBer</h1>
           <p>AI Chat</p>
+          <button onclick="clearChat()" style="position:absolute;right:1.2rem;top:0.8rem;background:rgba(255,255,255,0.5);border:1px solid rgba(101,142,198,0.3);border-radius:1rem;padding:2px 10px;font-size:0.7rem;color:#658ec6;cursor:pointer;">清屏</button>
         </div>
         <div class="chat-messages" id="messages">
           <div class="msg huber">
@@ -328,6 +329,17 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
     const TOOLS = [{
       type: "function",
       function: {
+        name: "calculator",
+        description: "执行数学计算，支持加减乘除、幂运算、三角函数等",
+        parameters: {
+          type: "object",
+          properties: { expression: { type: "string", description: "数学表达式，如 123*456 或 Math.sqrt(144)" } },
+          required: ["expression"]
+        }
+      }
+    },{
+      type: "function",
+      function: {
         name: "get_current_time",
         description: "获取当前精确的日期和时间",
         parameters: { type: "object", properties: {}, required: [] }
@@ -375,6 +387,13 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
           return args.city + "当前" + weatherDesc + "，温度" + w.temperature + "°C，风速" + w.windspeed + "km/h";
         } catch(e) { return "天气查询失败"; }
       }
+      
+      if (name === "calculator") {
+        try {
+          const result = Function('"use strict"; return (' + args.expression + ')')();
+          return args.expression + " = " + result;
+        } catch(e) { return "计算失败: " + e.message; }
+      }
       return "未知工具";
     }
 
@@ -420,6 +439,76 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
     }
 
     // old send function (replaced, this comment marks the end)
+
+    // ===== 聊天记录持久化 =====
+    function saveHistory() {
+      const msgs = [];
+      document.querySelectorAll('.msg').forEach(m => {
+        if (m.classList.contains('thinking')) return;
+        const sender = m.querySelector('.sender');
+        const time = m.querySelector('.time');
+        const text = m.childNodes;
+        let content = '';
+        for (const node of m.childNodes) {
+          if (node.nodeType === 3) content += node.textContent;
+          if (node.className !== 'sender' && node.className !== 'time' && node.nodeType === 1) content += node.textContent;
+        }
+        // simpler approach: get innerText minus sender and time
+        const clone = m.cloneNode(true);
+        const s = clone.querySelector('.sender'); if (s) s.remove();
+        const t = clone.querySelector('.time'); if (t) t.remove();
+        msgs.push({ who: sender ? sender.textContent : '', text: clone.textContent.trim() });
+      });
+      localStorage.setItem('huber_chat_history', JSON.stringify(msgs.slice(-50)));
+      localStorage.setItem('huber_chat_messages', JSON.stringify(messages));
+    }
+
+    function loadHistory() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('huber_chat_history') || '[]');
+        const container = document.getElementById('messages');
+        container.innerHTML = '';
+        saved.forEach(m => {
+          const cls = m.who === '你' ? 'you' : 'huber';
+          addMsgRaw(m.who, m.text, cls);
+        });
+        const savedMsgs = JSON.parse(localStorage.getItem('huber_chat_messages') || 'null');
+        if (savedMsgs) messages = savedMsgs;
+      } catch(e) {}
+    }
+
+    function addMsgRaw(who, text, cls) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + cls;
+      div.innerHTML = (who ? '<div class="sender">' + who + '</div>' : '') + text + '<div class="time">' + timeStr() + '</div>';
+      document.getElementById('messages').appendChild(div);
+      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+      return div;
+    }
+
+    // 加载历史
+    loadHistory();
+    if (document.querySelectorAll('.msg').length === 0) {
+      addMsgRaw('HuBer', '嗷~有啥事？[猪头]', 'huber');
+    }
+
+    // 发送后保存
+    const origAddMsg = addMsg;
+    addMsg = function(who, text, cls) {
+      const div = origAddMsg(who, text, cls);
+      saveHistory();
+      return div;
+    };
+
+    // 清除聊天
+    function clearChat() {
+      messages = [{ role: "system", content: getSystemPrompt() }];
+      localStorage.removeItem('huber_chat_history');
+      localStorage.removeItem('huber_chat_messages');
+      document.getElementById('messages').innerHTML = '';
+      addMsgRaw('HuBer', '嗷~有事？[猪头]', 'huber');
+      saveHistory();
+    }
   </script>
 </body>
 </html>
