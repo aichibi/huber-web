@@ -312,43 +312,114 @@ let messages = [{ role: "system", content: getSystemPrompt() }];
       const btn = document.getElementById('sendBtn');
       const text = input.value.trim();
       if (!text) return;
-
-      input.value = '';
-      input.disabled = true;
-      btn.disabled = true;
-
+      input.value = ''; input.disabled = true; btn.disabled = true;
       addMsg('你', text, 'you');
-      const thinking = addMsg('HuBer', '正在输入...', 'thinking');
 
       try {
-        messages.push({ role: 'user', content: text });
-        if (messages.length > 21) messages = [messages[0], ...messages.slice(-20)];
-
-        const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-          body: JSON.stringify({ model: 'deepseek-chat', messages, temperature: 0.85, max_tokens: 200 }),
-        });
-
-        if (!res.ok) {
-          const err = await res.text();
-          throw new Error(res.status + ': ' + err.substring(0, 100));
-        }
-
-        const data = await res.json();
-        const reply = data.choices[0].message.content;
-        messages.push({ role: 'assistant', content: reply });
-        thinking.remove();
+        const reply = await callWithTools(text);
         addMsg('HuBer', reply, 'huber');
       } catch (e) {
-        thinking.remove();
-        addMsg('HuBer', '可恶，回复失败了 [发呆]\n' + e.message, 'huber');
+        addMsg('HuBer', '可恶，回复失败了 [发呆]', 'huber');
+      }
+      input.disabled = false; btn.disabled = false; input.focus();
+    }
+
+    // ===== Function Calling 工具定义 =====
+    const TOOLS = [{
+      type: "function",
+      function: {
+        name: "get_current_time",
+        description: "获取当前精确的日期和时间",
+        parameters: { type: "object", properties: {}, required: [] }
+      }
+    }, {
+      type: "function",
+      function: {
+        name: "get_weather",
+        description: "获取指定城市的当前天气",
+        parameters: {
+          type: "object",
+          properties: { city: { type: "string", description: "城市名称，如北京、上海、西安" } },
+          required: ["city"]
+        }
+      }
+    }];
+
+    // ===== 执行工具调用 =====
+    async function executeTool(name, args) {
+      if (name === "get_current_time") {
+        const now = new Date();
+        return now.toLocaleString("zh-CN", {
+          year:"numeric", month:"long", day:"numeric",
+          weekday:"long", hour:"2-digit", minute:"2-digit", second:"2-digit"
+        });
+      }
+      if (name === "get_weather") {
+        try {
+          // Open-Meteo 免费天气API
+          const cityCoords = { "北京": [39.9,116.4], "上海":[31.2,121.5], "广州":[23.1,113.3],
+            "深圳":[22.5,114.1], "西安":[34.3,108.9], "武汉":[30.6,114.3], "杭州":[30.3,120.2],
+            "成都":[30.6,104.1], "重庆":[29.6,106.5], "南京":[32.1,118.8], "延安":[36.6,109.5],
+            "南昌":[28.7,115.9], "天津":[39.1,117.2], "长沙":[28.2,113.0] };
+          const coords = cityCoords[args.city] || [35,110];
+          const url = "https://api.open-meteo.com/v1/forecast?latitude=" + coords[0] +
+            "&longitude=" + coords[1] + "&current_weather=true&timezone=Asia/Shanghai";
+          const res = await fetch(url);
+          const data = await res.json();
+          const w = data.current_weather;
+          const weatherMap = {0:"晴天",1:"大部晴",2:"多云",3:"阴天",45:"雾",48:"霜雾",
+            51:"小雨",53:"中雨",55:"大雨",61:"小阵雨",63:"中阵雨",65:"大阵雨",
+            71:"小雪",73:"中雪",75:"大雪",77:"雪粒",80:"小阵雨",81:"中阵雨",82:"大阵雨",
+            85:"小雪",86:"大雪",95:"雷暴",96:"雷暴+冰雹",99:"强雷暴+冰雹"};
+          const weatherDesc = weatherMap[w.weathercode] || ("天气码"+w.weathercode);
+          return args.city + "当前" + weatherDesc + "，温度" + w.temperature + "°C，风速" + w.windspeed + "km/h";
+        } catch(e) { return "天气查询失败"; }
+      }
+      return "未知工具";
+    }
+
+    // ===== Function Calling 对话 =====
+    async function callWithTools(userText) {
+      messages.push({ role: "user", content: userText });
+      if (messages.length > 21) messages = [messages[0], ...messages.slice(-20)];
+
+      // 第一次调用
+      let res = await fetch("https://api.deepseek.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+        body: JSON.stringify({ model: "deepseek-chat", messages, tools: TOOLS, temperature: 0.85, max_tokens: 300 }),
+      });
+      if (!res.ok) throw new Error("API错误");
+      let data = await res.json();
+      let choice = data.choices[0];
+
+      // 如果模型要调工具
+      if (choice.finish_reason === "tool_calls") {
+        const toolCall = choice.message.tool_calls[0];
+        const fnName = toolCall.function.name;
+        const fnArgs = JSON.parse(toolCall.function.arguments);
+        const fnResult = await executeTool(fnName, fnArgs);
+
+        // 把工具结果发回去
+        messages.push(choice.message);
+        messages.push({ role: "tool", tool_call_id: toolCall.id, content: fnResult });
+
+        res = await fetch("https://api.deepseek.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+          body: JSON.stringify({ model: "deepseek-chat", messages, temperature: 0.85, max_tokens: 300 }),
+        });
+        if (!res.ok) throw new Error("API错误");
+        data = await res.json();
+        choice = data.choices[0];
       }
 
-      input.disabled = false;
-      btn.disabled = false;
-      input.focus();
+      const reply = choice.message.content;
+      messages.push({ role: "assistant", content: reply });
+      return convertEmoji(reply);
     }
+
+    // old send function (replaced, this comment marks the end)
   </script>
 </body>
 </html>
