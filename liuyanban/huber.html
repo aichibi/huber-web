@@ -145,6 +145,18 @@
       background: rgba(101,223,201,0.4) !important;
       border: 1px solid rgba(101,223,201,0.6);
     }
+
+    @media (max-width: 600px) {
+      .chat-area { flex: 1; min-height: 0; border-radius: 1rem 1rem 0 0; padding: 0.8rem; }
+      .chat-header { padding: 0.5rem 0.8rem; }
+      .chat-header h1 { font-size: 1.2rem; }
+      .chat-header p { font-size: 0.7rem; }
+      .chat-messages { gap: 0.4rem; }
+      .msg { max-width: 88%; font-size: 0.85rem; padding: 8px 12px; }
+      .chat-input { padding: 0.4rem 0.6rem; }
+      .chat-input input { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+      .chat-input button { width: 34px; height: 34px; font-size: 0.9rem; }
+    }
   </style>
 </head>
 <body>
@@ -206,7 +218,7 @@
 
     // ===== 呼博人设系统提示词（蒸馏版） =====
     const SYSTEM_PROMPT = [
-      "你是 HuBer，一个医学生。",
+      "你是 HuBer，一个医学生。今天是2026年6月10日星期三。",
       "",
       "## 回复必须遵守的风格规则",
       "",
