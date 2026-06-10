@@ -177,7 +177,7 @@
         </div>
         <div class="chat-messages" id="messages">
           <div class="msg huber">
-            <div class="sender">呼博</div>
+            <div class="sender">HuBer</div>
             嗷~有啥事？[猪头]
             <div class="time" id="initTime"></div>
           </div>
@@ -261,7 +261,7 @@
     function addMsg(who, text, cls) {
       const div = document.createElement('div');
       div.className = 'msg ' + cls;
-      div.innerHTML = (who ? '<div class="sender">' + who + '</div>' : '') + text + '<div class="time">' + timeStr() + '</div>';
+      div.innerHTML = (who ? '<div class="sender">' + who + '</div>' : '') + convertEmoji(text) + '<div class="time">' + timeStr() + '</div>';
       const container = document.getElementById('messages');
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
