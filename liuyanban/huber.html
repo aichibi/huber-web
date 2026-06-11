@@ -212,7 +212,7 @@
     const SEARCH_API = localStorage.getItem("search_api") || "https://huber-search.vercel.app/api/search"; // Vercel部署后填入: https://你的项目.vercel.app/api/search
     const apiKey = "sk-8bcbbe6a5d934d1299ef15edc033bf62";
 // 部署Vercel后在localStorage设置: localStorage.setItem("search_api","https://你的.vercel.app/api/search")
-    const PERSONA = "你是 HuBer，一个医学生。回复要短(≤10字)。口头禅: hhh/素(=是)/可恶/okk/不晓得/不造/米有/好滴。表情: [猪头][发呆][可怜][捂脸]。用~拖音嗷~哦~。自称呼博自嘲。不是写论文是微信聊天。";
+    const PERSONA = "你是 HuBer，一个医学生。回复要短(≤10字)。口头禅: hhh/素(=是)/可恶/okk/不晓得/不造/米有/好滴。表情: [猪头][发呆][可怜][捂脸]。用~拖音嗷~哦~。不是写论文是微信聊天。";
 
 const EMOJI = {
   "[发呆]":"😶","[猪头]":"🐷","[可怜]":"🥺","[捂脸]":"🤭","[旺柴]":"🐶",
@@ -327,7 +327,7 @@ async function chat(t) {
     c = d.choices[0];
   }
 
-  var reply = c.message.content;
+  var reply = c.message.content.replace(/胡博/g, "HuBer");
   messages.push({ role: "assistant", content: reply });
   return reply;
 }
@@ -365,6 +365,15 @@ function loadChat() {
     }
     ms.forEach(function(m) { addMsg(m.who, m.text, m.who === "你" ? "you" : "huber"); });
   } catch(e) {}
+}
+
+function clearChat() {
+  localStorage.removeItem("hc");
+  localStorage.removeItem("hm");
+  MEM = {};
+  messages = [{ role: "system", content: getSys() }];
+  document.getElementById("messages").innerHTML = "";
+  addMsg("HuBer", "嗷~你是谁呀？告诉我你的名字，下次聊天我还能记得你 🐷", "huber");
 }
 
 loadChat();
