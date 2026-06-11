@@ -369,14 +369,11 @@ function loadChat() {
 
 function clearChat() {
   localStorage.removeItem("hc");
+  localStorage.removeItem("hm");
+  MEM = {};
   messages = [{ role: "system", content: getSys() }];
   document.getElementById("messages").innerHTML = "";
-  var name = MEM["名字"];
-  if (name) {
-    addMsg("HuBer", "嗷~" + name + "，聊天记录清掉啦，但我还记得你哦 🐷", "huber");
-  } else {
-    addMsg("HuBer", "嗷~你是谁呀？告诉我你的名字，下次聊天我还能记得你 🐷", "huber");
-  }
+  addMsg("HuBer", "嗷~你是谁呀？告诉我你的名字，下次聊天我还能记得你 🐷", "huber");
 }
 
 loadChat();
